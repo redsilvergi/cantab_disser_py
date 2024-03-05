@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar  1 01:51:02 2024
+Created on Tue Mar  5 04:33:33 2024
 
 @author: eungi
 """
@@ -9,14 +9,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from sklearn.cluster import KMeans
+# scikit-learn
 ##import csv -------------------------------------------------
-seoul23 = pd.read_csv('seoul23.csv')
-seoul23r = pd.read_csv('seoul23r.csv')
+data = pd.read_csv('./csv/kw23.csv')
+datar = pd.read_csv('./csv/kw23r.csv')
 
 ##delete unnecessary columns -------------------------------------------------
-sale = seoul23.drop(columns=['NO','시군구','번지','본번','부번'])
-rent = seoul23r.drop(columns=['NO','시군구','번지','본번','부번'])
-#sale = seoul23.rename(columns={'단지명':'cmplx'})
+sale = data.drop(columns=['NO','시군구','번지','본번','부번'])
+rent = datar.drop(columns=['NO','시군구','번지','본번','부번'])
+#sale = data.rename(columns={'단지명':'cmplx'})
 sale.rename(columns={'단지명':'cmplx','전용면적(㎡)':'area', '계약년월': 'cntrct_ym','계약일':'cntrct_d','거래금액(만원)':'price','동':'dong','층':'floor','매수자':'buyer','매도자':'seller','건축년도':'built','도로명':'address','해제사유발생일':'cancel_at','거래유형':'trns_type','중개사소재지':'brokerat','등기일자':'reg_at'}, inplace=True)
 sale.dtypes
 sale['price'] = sale['price'].astype(str).str.strip().str.replace(',','')
@@ -114,6 +116,8 @@ az['dpratio'] = (az['dpst']*10000*0.035 + az['rent']*10000*12) / (az['price']*10
 az.memory_usage(deep=True).sum() / (1024 * 1024)
 
 az['g4'] = (0.04*az['pdratio']-1) / (az['pdratio']+1)
+az['r-g4'] = 0.04 - ((0.04*az['pdratio']-1) / (az['pdratio']+1))
+
 #az['g5'] = (0.05*az['pdratio']-1) / (az['pdratio']+1)
 #az['g6'] = (0.06*az['pdratio']-1) / (az['pdratio']+1)
 #az['g7'] = (0.07*az['pdratio']-1) / (az['pdratio']+1)
@@ -130,7 +134,6 @@ az['g4'] = (0.04*az['pdratio']-1) / (az['pdratio']+1)
 #az['r-g50'] = 0.5 - ((0.5*az['pdratio']-1) / (az['pdratio']+1))
 #az['r-g100'] = 1 - ((1*az['pdratio']-1) / (az['pdratio']+1))
 
-az['r-g4'] = 0.04 - ((0.04*az['pdratio']-1) / (az['pdratio']+1))
 vals2 = []
 for i in range (4, 16):
     rg = 0.01*i - ((0.01*i*az['pdratio']-1) / (az['pdratio']+1))
@@ -142,48 +145,34 @@ az.memory_usage(deep=True).sum() / (1024 * 1024)
 plt.hist(az['rg415m'])
 
 
+###############################################
+plt.plot(az['price'], az['rg415m'])
+plt.xlabel('price')
+plt.ylabel('rg415m')
+plt.title('kw')
 
+corrkw = az['price'].corr(az['rg415m'])
+print(corrkw)
+
+##############################################
+inputdata= az[['price','rg415m','built','dpst','rent','floor','area']]
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(inputdata)
+
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+
+print("Centroids:", centroids)
+print("Labels:", labels)
+
+plt.scatter(az['rg415m'], az['price'], c=labels, cmap='viridis')
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='X', s=200, c='red', label='Centroids')
+plt.xlabel('prc')
+plt.ylabel('rg')
+plt.title('K-means Clustering')
+plt.legend()
+plt.show()
 
 ##export az-------------------------------------------------------
 #az.to_csv('az.csv', index=False)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-tmp = rnt[rnt['dpst'] != 0]
-print(rnt[rnt['dpst'] == 0])
-rnt['yield'] = rnt['rent'] / rnt['dpst']
-
-
-tmp['yld'] = tmp['rent'] / tmp['dpst']
-tmp['yld'].hist()
-
-tmp2 = tmp[tmp['yld'] < 0.2]
-print(tmp2['yld'])
-plt.hist(tmp2['yld'])
-plt.show()
-
-tmp2['yld_ln'] = np.log(tmp2['yld'])
-
-tmp3['a'] =  az['dpst'] /az['price']
-tmp3['a'].mean()
-
-tmp4['a'] = az['rent'] / az['price']
-tmp4['a'].mean()
