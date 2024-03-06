@@ -1,0 +1,20 @@
+sol 11
+bus 26
+dag 27
+inc 28
+gwj 29
+
+daj 30
+uls 31
+sej 36
+gyg 41
+ncc 43
+
+scc 44
+sjl 46
+ngs 47
+sgs 48
+jju 50
+
+gnw 51
+njl 52
