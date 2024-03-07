@@ -13,8 +13,75 @@ Created on Tue Mar  5 15:47:41 2024
 
 import pandas as pd
 
+## --------------------------------------------------------------------
+
+cord = pd.read_csv('./csv/coord/cordtill30000ish.csv',low_memory=False)
+
+fom = pd.read_csv('./csv/mrgd/fom.csv',low_memory=False)
+addresses = fom["address"].unique()
+# addresses_df = pd.DataFrame(fom["address"].unique()) 
+# addresses_df.columns = ['address']
+
+cord[32973:]
+cord.shape[0]
+
+tmp = addresses[33178:]
+addresses[33178:].shape[0]
+
+# tmp = addresses_df[addresses_df['address'] == '지양로11길 3'] # 33177 index
+
+
+# coord1 = pd.read_csv('./csv/coord/cordtill2872.csv',low_memory=False)
+# coord2 = pd.read_csv('./csv/coord/cordfrom2873to30000ish.csv',low_memory=False)
+# coord3 = pd.concat([coord1,coord2],axis=0)
+# coord4 = pd.concat([coord1,coord2],ignore_index=True)
+
+# coord4.to_csv('./res_tmp/cordtill30000ish.csv', index=False)
+
+## --------------------------------------------------------------------
+fom2 = pd.read_csv('./csv/mrgd/fom2.csv',low_memory=False)
+
+fom['pdratio'] = (fom['price']*10000) / (fom['dpst']*10000*0.035 + fom['rent']*10000*12)
+fom['dpratio'] = (fom['dpst']*10000*0.035 + fom['rent']*10000*12) / (fom['price']*10000)
+
+fom.memory_usage(deep=True).sum() / (1024 * 1024)
+
+fom['g4'] = (0.04*fom['pdratio']-1) / (fom['pdratio']+1)
+#fom['g5'] = (0.05*fom['pdratio']-1) / (fom['pdratio']+1)
+#fom['g6'] = (0.06*fom['pdratio']-1) / (fom['pdratio']+1)
+#fom['g7'] = (0.07*fom['pdratio']-1) / (fom['pdratio']+1)
+#fom['r-g5'] = 0.05 - ((0.05*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g6'] = 0.06 - ((0.06*fom['pdratio']-1) / (fom['pdratio']+1))
+# fom['r-g7'] = 0.07 - ((0.07*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g8'] = 0.08 - ((0.08*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g9'] = 0.09 - ((0.09*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g10'] = 0.1 - ((0.1*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g15'] = 0.15 - ((0.15*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g20'] = 0.2 - ((0.2*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g30'] = 0.3 - ((0.3*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g40'] = 0.4 - ((0.4*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g50'] = 0.5 - ((0.5*fom['pdratio']-1) / (fom['pdratio']+1))
+#fom['r-g100'] = 1 - ((1*fom['pdratio']-1) / (fom['pdratio']+1))
+
+fom['r-g4'] = 0.04 - ((0.04*fom['pdratio']-1) / (fom['pdratio']+1))
+vals2 = []
+for i in range (4, 16):
+    rg = 0.01*i - ((0.01*i*fom['pdratio']-1) / (fom['pdratio']+1))
+    vals2.append(rg)
+fom['rg415m'] = sum(vals2) / len(vals2)
+
+fom.memory_usage(deep=True).sum() / (1024 * 1024)
+
+plt.hist(fom['rg415m'])
+
+# fom.to_csv('./fom2.csv',index=False)
+
+
+
+
 
 ## -------------------------------------------------------------------
+cord = pd.read_csv('C:/Users/eungi/Desktop/eungi_dt/ec2dwnld/cord.csv', low_memory=False)
 fom = pd.read_csv('./csv/mrgd/fom.csv',low_memory=False)
 # tmp1 = pd.read_csv('./csv/mrgd/mrgd_flat23.csv',low_memory=False)
 # tmp2 = pd.read_csv('./csv/mrgd/mrgd_officetel23.csv', low_memory=False)
@@ -32,13 +99,8 @@ tmp2.columns
 
 
 
-
-
-
-
-
 ## -----------------------------------------------------
-tmp = pd.read_csv("./csv/2023/sale/officetel/sej.csv", encoding='ansi',skiprows=15, low_memory=False)
+tmp = pd.read_csv("./csv/2023/sale/officetel/sej.csv", encoding='ansi', skiprows=15, low_memory=False)
 tmp2 = pd.read_csv("./csv/2023/sale/flat/sej23.csv", low_memory=False)
 
 # tmp.to_csv('./res_tmp/tmp.csv',index=False)
